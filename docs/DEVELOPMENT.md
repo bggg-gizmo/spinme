@@ -40,6 +40,10 @@ ANDROID_SDK_ROOT=/path/to/sdk \
 
 Never commit release keys or passwords.
 
+### Release signing lineage
+
+SpinMe v0.2.0 begins a new Android signing lineage. Its certificate SHA-256 is `bcfd9417869e6671e2f33efa7345cd49c0f4a9452d014f1d1fab67de2e166093`. Preserve that key outside the repository and use it for future releases that must upgrade v0.2.0 installations. Because v0.1.0 used a different signing certificate, it cannot be upgraded in place to v0.2.0; the older installation must be removed first.
+
 ## Core invariants
 
 1. Source animation timing is independent of RPM.
