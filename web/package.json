@@ -1,7 +1,7 @@
 {
   "name": "spinme-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,4 +16,4 @@
   },
   "description": "SpinMe — Background Gremlin Group — Creating Unique Tools for Unique Individuals",
   "author": "Background Gremlin Group"
-}\n
+}
