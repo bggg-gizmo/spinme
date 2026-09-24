@@ -61,9 +61,16 @@
 
             <label class="field">
               <span>Exact RPM</span>
-              <input id="rpmInput" type="number" min="0" max="3000" step="0.1" value="60" />
-              <small>Spin clock only. GIF frame timing never changes.</small>
+              <input id="rpmInput" type="number" min="0" step="0.1" value="60" />
+              <small>No fixed RPM maximum. Source animation timing remains independent.</small>
             </label>
+
+            <div class="slider-row">
+              <label for="rampDuration">Ramp duration</label>
+              <output id="rampDurationOut">5.0s</output>
+            </div>
+            <input id="rampDuration" type="range" min="0.5" max="60" step="0.5" value="5" />
+            <button id="rampBtn" class="secondary-button ramp-button" type="button">Ramp 0 → target</button>
 
             <div class="button-grid">
               <button id="pauseBtn" class="secondary-button" type="button">Pause spin</button>
