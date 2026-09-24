@@ -15,7 +15,7 @@ The Android runtime has no third-party library dependencies.
 
 Open the repository in Android Studio or use the included Gradle wrapper.
 
-The Android module is `app/`, package `com.spinme.app`, minSdk 29, targetSdk 36, version 0.2.0.
+The Android module is `app/`, package `com.spinme.app`, minSdk 29, targetSdk 36, version 1.0.0.
 
 ## Direct SDK build
 
@@ -42,7 +42,7 @@ Never commit release keys or passwords.
 
 ### Release signing lineage
 
-SpinMe v0.2.0 begins a new Android signing lineage. Its certificate SHA-256 is `bcfd9417869e6671e2f33efa7345cd49c0f4a9452d014f1d1fab67de2e166093`. Preserve that key outside the repository and use it for future releases that must upgrade v0.2.0 installations. Because v0.1.0 used a different signing certificate, it cannot be upgraded in place to v0.2.0; the older installation must be removed first.
+SpinMe v1.0.0 uses the signing lineage introduced for v0.2.0. Its certificate SHA-256 is `bcfd9417869e6671e2f33efa7345cd49c0f4a9452d014f1d1fab67de2e166093`. Preserve that key outside the repository and use it for future releases that must upgrade v1.0.0 installations. Because v0.1.0 used a different signing certificate, it cannot be upgraded in place to v1.0.0; the older installation must be removed first.
 
 ## Core invariants
 
