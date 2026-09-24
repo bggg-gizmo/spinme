@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.0 — Verified public release
+
+- Rebuilt and republished the Android APK as version 1.0.0 (versionCode 3).
+- Replaced the withdrawn malformed v0.2.0 APK with a structurally verified ZIP/APK.
+- Verified zip alignment, APK Signature Scheme v3, package identity, SDK levels, version metadata, and release checksum.
+- Preserved the uncapped RPM, adjustable ramp-up, independent source/spin clocks, playback modes, pivot, scale, theme, PNG, GIF, MP4, and web companion features.
+- Added release-build ZIP and zipalign validation so malformed APK archives fail the direct build verification step.
+- v1.0.0 uses the same signing lineage introduced after v0.1.0.
+
 ## v0.2.0 — Uncapped spin, ramp-up, and material polish
 
 - Exact RPM entry no longer has a fixed 3000 RPM ceiling.
