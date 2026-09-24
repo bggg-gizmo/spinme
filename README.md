@@ -6,24 +6,25 @@ SpinMe is a local-first Android image/GIF spinner with a companion web build. It
 
 ## Download
 
-[Download SpinMe v0.1.0 APK](releases/SpinMe-v0.1.0.apk)
+[Download SpinMe v0.2.0 APK](releases/SpinMe-v0.2.0.apk)
 
 - Package: `com.spinme.app`
-- Version: `0.1.0` (versionCode 1)
+- Version: `0.2.0` (versionCode 2)
 - minSdk: 29
 - targetSdk: 36
-- SHA-256: `0c62c3362d3074d3adecc7709d4dddae904d5345693ab3c8a23cb6cbefdef5dc`
+- SHA-256: see [`releases/SHA256SUMS.txt`](releases/SHA256SUMS.txt)
 - Publisher/creator: **Background Gremlin Group**
 - Tagline: **Creating Unique Tools for Unique Individuals**
 
-The APK is signed with the Background Gremlin Group release certificate. See [releases/SHA256SUMS.txt](releases/SHA256SUMS.txt).
+Release artifact verification is recorded in [releases/SHA256SUMS.txt](releases/SHA256SUMS.txt) and [releases/RELEASE-METADATA.txt](releases/RELEASE-METADATA.txt).
 
 ## Android features
 
 - GIF, PNG, JPEG, and WebP input through Android's document picker.
 - Native animated GIF playback while the complete media layer spins.
 - Source playback modes: Ping-pong (default), Loop, and Once.
-- Independent spin clock from 0 to 3000 RPM.
+- User-defined spin speed with no fixed RPM ceiling; the existing 0–3000 RPM slider remains for convenient adjustment, while exact RPM entry accepts higher values such as 20,000+ RPM.
+- Linear ramp-up mode from 0 RPM to the selected target speed with an adjustable 0.5–60 second duration.
 - Clockwise/counter-clockwise direction and spin pause/resume.
 - Adjustable start angle, scale, pivot X/Y, and direct pivot dragging on the preview.
 - Output sizes: 512, 720, 1080, and 1440 square.
