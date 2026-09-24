@@ -10,3 +10,6 @@ local.properties
 *.key
 .env
 .env.*
+
+web/node_modules/
+web/dist/
