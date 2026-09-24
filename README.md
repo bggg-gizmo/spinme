@@ -12,7 +12,8 @@ SpinMe is a local-first Android image/GIF spinner with a companion web build. It
 - Version: `0.2.0` (versionCode 2)
 - minSdk: 29
 - targetSdk: 36
-- SHA-256: see [`releases/SHA256SUMS.txt`](releases/SHA256SUMS.txt)
+- APK path on `main`: [`releases/SpinMe-v0.2.0.apk`](releases/SpinMe-v0.2.0.apk)
+- SHA-256: `4429878ccbe3427dd46a33ecaa9a6b60f9a8dab261fe67325c90271513befd2b`
 - Publisher/creator: **Background Gremlin Group**
 - Tagline: **Creating Unique Tools for Unique Individuals**
 
