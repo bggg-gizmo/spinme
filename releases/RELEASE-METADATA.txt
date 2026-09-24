@@ -6,11 +6,15 @@ Version Code: 3
 Version Name: 1.0.0
 minSdk: 29
 targetSdk: 36
+APK Path: releases/SpinMe-v1.0.0.apk
+APK Size: 45800 bytes
 APK SHA-256: ec7b0d95d4a0c1ba0e7d9e5d70ce673efc28ca93c7a30624925556d0d4301389
 Git Blob SHA: deb9f22b9b2c2a209593ee776eee68957408bf8d
 Signing Certificate SHA-256: bcfd9417869e6671e2f33efa7345cd49c0f4a9452d014f1d1fab67de2e166093
 Signing Certificate DN: CN=Background Gremlin Group, OU=Creating Unique Tools for Unique Individuals, O=Background Gremlin Group
-Signing Key Lineage: v1.0.0 uses the release signing lineage introduced after v0.1.0.
+Signing Key Lineage: v1.0.0 uses the release signing lineage introduced with v0.2.0.
 Upgrade Note: v0.1.0 used a different signing certificate and cannot be upgraded in place to v1.0.0. Uninstall v0.1.0 first. Future releases intended to upgrade v1.0.0 must use the same release key.
-Artifact Verification: ZIP central directory validated; zipalign verification passed; APK Signature Scheme v3 verification passed; package/version verified as com.spinme.app / versionCode 3 / versionName 1.0.0.
+Artifact Verification: ZIP central directory/archive integrity validated; zipalign verification passed; APK Signature Scheme v3 verification passed; package/version verified as com.spinme.app / versionCode 3 / versionName 1.0.0.
 Build Environment: Android SDK Platform 36 / Build Tools 36.0.0.
+Release Status: Current supported public release.
+Withdrawn Artifact: SpinMe v0.2.0 public APK is withdrawn/unsupported and archived under old_bulids/.
