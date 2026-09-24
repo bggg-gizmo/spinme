@@ -146,7 +146,11 @@ public final class SpinView extends View {
 
         if (ramping) {
             long phase = Math.min(rampElapsed, rampDurationMs);
-            rampStartMs = now - phase;
+            long anchor =
+                spinPaused && pauseStartedMs > 0L
+                    ? pauseStartedMs
+                    : now;
+            rampStartMs = anchor - phase;
             rampStartAngleDeg = normalize(
                 angle - direction * rampDegreesForElapsed(phase)
             );
