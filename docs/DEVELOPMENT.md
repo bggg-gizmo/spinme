@@ -15,7 +15,7 @@ The Android runtime has no third-party library dependencies.
 
 Open the repository in Android Studio or use the included Gradle wrapper.
 
-The Android module is `app/`, package `com.spinme.app`, minSdk 29, targetSdk 36, version 0.1.0.
+The Android module is `app/`, package `com.spinme.app`, minSdk 29, targetSdk 36, version 0.2.0.
 
 ## Direct SDK build
 
@@ -48,3 +48,6 @@ Never commit release keys or passwords.
 4. Direction changes affect rotation only.
 5. Export samples the same source/spin state model as preview.
 6. Pivot coordinates remain normalized to the output canvas.
+7. Exact RPM values are not capped at 3000; manual RPM input may exceed 20,000 RPM.
+8. Ramp-up pauses with spin pause and export preserves the current ramp phase.
+9. Dark mode uses visible carbon-fiber surfaces with metallic-gold inlays; light mode uses white/ivory carbon fiber with mother-of-pearl inlays.
