@@ -27,7 +27,7 @@ public final class Exporter {
         float base=Math.min(w/(float)sw,h/(float)sh)*s.scale;
         float dw=sw*base, dh=sh*base;
         float left=(w-dw)*.5f, top=(h-dh)*.5f;
-        float angle=normalize((float)(s.angleDeg+s.direction*s.rpm*6.0*(offsetMs/1000.0)));
+        float angle=angleAtOffset(s,offsetMs);
         c.save();
         c.rotate(angle,s.pivotX*w,s.pivotY*h);
         if(movie!=null){
@@ -184,6 +184,26 @@ public final class Exporter {
         }
         return out;
     }
+    private static float angleAtOffset(SpinView.Snapshot s,long offsetMs){
+        double elapsedSeconds=Math.max(0L,offsetMs)/1000.0;
+        if(!s.ramping||s.rampDurationMs<=0L){
+            return normalize((float)(s.angleDeg+s.direction*s.rpm*6.0*elapsedSeconds));
+        }
+
+        double duration=Math.max(0.001,s.rampDurationMs/1000.0);
+        double startProgress=Math.max(0.0,Math.min(duration,s.rampElapsedMs/1000.0));
+        double endProgress=startProgress+elapsedSeconds;
+        double rampEnd=Math.min(endProgress,duration);
+
+        double rpmSeconds=0.0;
+        if(rampEnd>startProgress){
+            rpmSeconds+=s.rpm*((rampEnd*rampEnd)-(startProgress*startProgress))/(2.0*duration);
+        }
+        rpmSeconds+=s.rpm*Math.max(0.0,endProgress-duration);
+
+        return normalize((float)(s.angleDeg+s.direction*6.0*rpmSeconds));
+    }
+
     private static int clamp(int v){return v<0?0:Math.min(255,v);}    
     private static float normalize(float d){float v=d%360f;return v<0?v+360f:v;}
 }
