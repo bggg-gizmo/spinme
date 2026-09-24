@@ -19,6 +19,9 @@ const el = {
   rpmRange: $("rpmRange"),
   rpmInput: $("rpmInput"),
   rpmReadout: $("rpmReadout"),
+  rampDuration: $("rampDuration"),
+  rampDurationOut: $("rampDurationOut"),
+  rampBtn: $("rampBtn"),
   pauseBtn: $("pauseBtn"),
   directionBtn: $("directionBtn"),
   zeroBtn: $("zeroBtn"),
@@ -53,6 +56,10 @@ const state = {
   sourceFile: null,
   objectUrl: null,
   rpm: 60,
+  rpmRangeMax: 3000,
+  ramping: false,
+  rampElapsed: 0,
+  rampDuration: 5,
   direction: 1,
   angle: 0,
   spinning: true,
@@ -109,7 +116,11 @@ function updateControls() {
   el.emptyOpenBtn.disabled = state.exportBusy;
   el.fileInput.disabled = state.exportBusy;
   el.rpmReadout.textContent = state.rpm.toFixed(1) + " RPM";
-  el.rpmRange.value = String(state.rpm);
+  el.rpmRange.max = String(state.rpmRangeMax);
+  el.rpmRange.value = String(Math.min(state.rpm, state.rpmRangeMax));
+  el.rampDuration.value = String(state.rampDuration);
+  el.rampDurationOut.textContent = state.rampDuration.toFixed(1) + "s";
+  el.rampBtn.textContent = state.ramping ? "Restart ramp 0 → target" : "Ramp 0 → target";
   if (document.activeElement !== el.rpmInput) {
     el.rpmInput.value = String(Number(state.rpm.toFixed(1)));
   }
@@ -206,8 +217,31 @@ function renderSourcePreview(now) {
 function animationLoop(now) {
   if (state.lastFrameTime !== 0 && state.spinning) {
     const dtSeconds = (now - state.lastFrameTime) / 1000;
+    let rpmSeconds = state.rpm * dtSeconds;
+
+    if (state.ramping) {
+      const duration = Math.max(0.1, state.rampDuration);
+      const startProgress = clamp(state.rampElapsed, 0, duration);
+      const rampSlice = Math.min(dtSeconds, Math.max(0, duration - startProgress));
+      const endProgress = startProgress + rampSlice;
+
+      rpmSeconds =
+        state.rpm *
+        ((endProgress * endProgress) - (startProgress * startProgress)) /
+        (2 * duration);
+
+      const postRampSeconds = Math.max(0, dtSeconds - rampSlice);
+      rpmSeconds += state.rpm * postRampSeconds;
+      state.rampElapsed = endProgress;
+
+      if (endProgress >= duration) {
+        state.ramping = false;
+        updateControls();
+      }
+    }
+
     state.angle = normalizeDegrees(
-      state.angle + state.direction * state.rpm * 6 * dtSeconds,
+      state.angle + state.direction * 6 * rpmSeconds,
     );
     updatePreview();
   }
@@ -252,6 +286,8 @@ async function loadSource(file) {
   state.objectUrl = URL.createObjectURL(file);
   state.angle = 0;
   state.spinning = true;
+  state.ramping = false;
+  state.rampElapsed = 0;
   state.sourcePlayback = "pingpong";
 
   el.sourceImage.src = state.objectUrl;
@@ -468,6 +504,43 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+function spinAngleForExport(startAngle, elapsedSeconds, spinState) {
+  const elapsed = Math.max(0, elapsedSeconds);
+  if (!spinState.ramping || spinState.rampDuration <= 0) {
+    return normalizeDegrees(
+      startAngle + spinState.direction * spinState.rpm * 6 * elapsed,
+    );
+  }
+
+  const duration = Math.max(0.001, spinState.rampDuration);
+  const startProgress = clamp(spinState.rampElapsed, 0, duration);
+  const endProgress = startProgress + elapsed;
+  const rampEnd = Math.min(endProgress, duration);
+
+  let rpmSeconds = 0;
+  if (rampEnd > startProgress) {
+    rpmSeconds +=
+      spinState.rpm *
+      ((rampEnd * rampEnd) - (startProgress * startProgress)) /
+      (2 * duration);
+  }
+
+  rpmSeconds += spinState.rpm * Math.max(0, endProgress - duration);
+  return normalizeDegrees(
+    startAngle + spinState.direction * 6 * rpmSeconds,
+  );
+}
+
+function captureSpinExportState() {
+  return {
+    rpm: state.rpm,
+    direction: state.direction,
+    ramping: state.ramping,
+    rampElapsed: state.rampElapsed,
+    rampDuration: state.rampDuration,
+  };
+}
+
 function outputName(extension) {
   const now = new Date();
   const stamp =
@@ -554,6 +627,7 @@ async function exportGif() {
   const frameCount = Math.max(1, Math.ceil(state.duration * fps));
   const delayMs = Math.max(10, Math.round(1000 / fps));
   const startAngle = state.angle;
+  const spinState = captureSpinExportState();
   const gif = GIFEncoder();
 
   if (!frameProvider) {
@@ -582,8 +656,10 @@ async function exportGif() {
       ? sourceAtElapsed(sourcePhaseMs + tMs)
       : el.sourceImage;
 
-    const angle = normalizeDegrees(
-      startAngle + state.direction * state.rpm * 6 * (tMs / 1000),
+    const angle = spinAngleForExport(
+      startAngle,
+      tMs / 1000,
+      spinState,
     );
 
     renderComposite(ctx, source, angle, state.transparent);
@@ -644,6 +720,7 @@ async function exportWebm() {
   });
 
   const startAngle = state.angle;
+  const spinState = captureSpinExportState();
   const start = performance.now();
   const sourcePhaseMs = Math.max(0, start - state.sourceLoadedAt);
   const durationMs = state.duration * 1000;
@@ -657,8 +734,10 @@ async function exportWebm() {
     if (elapsed >= durationMs) break;
 
     if (elapsed >= nextFrame) {
-      const angle = normalizeDegrees(
-        startAngle + state.direction * state.rpm * 6 * (elapsed / 1000),
+      const angle = spinAngleForExport(
+        startAngle,
+        elapsed / 1000,
+        spinState,
       );
       renderComposite(
         ctx,
@@ -673,8 +752,10 @@ async function exportWebm() {
     await sleep(Math.min(8, Math.max(1, nextFrame - (performance.now() - start))));
   }
 
-  const finalAngle = normalizeDegrees(
-    startAngle + state.direction * state.rpm * 6 * (durationMs / 1000),
+  const finalAngle = spinAngleForExport(
+    startAngle,
+    durationMs / 1000,
+    spinState,
   );
   renderComposite(
     ctx,
@@ -807,7 +888,15 @@ el.themeBtn.addEventListener("click", () => {
 });
 
 function setRpm(value) {
-  state.rpm = clamp(Number(value) || 0, 0, 3000);
+  state.rpm = Math.max(0, Number(value) || 0);
+  if (state.rpm > state.rpmRangeMax) {
+    state.rpmRangeMax = Math.max(
+      3000,
+      Math.ceil(state.rpm / 1000) * 1000,
+    );
+  }
+  state.ramping = false;
+  state.rampElapsed = 0;
   updateControls();
 }
 
@@ -816,6 +905,26 @@ el.rpmInput.addEventListener("input", () => setRpm(el.rpmInput.value));
 
 document.querySelectorAll(".rpm-preset").forEach((button) => {
   button.addEventListener("click", () => setRpm(button.dataset.rpm));
+});
+
+el.rampDuration.addEventListener("input", () => {
+  state.rampDuration = clamp(Number(el.rampDuration.value) || 5, 0.5, 60);
+  if (state.ramping && state.rampElapsed >= state.rampDuration) {
+    state.ramping = false;
+    state.rampElapsed = state.rampDuration;
+  }
+  updateControls();
+});
+
+el.rampBtn.addEventListener("click", () => {
+  state.rampElapsed = 0;
+  state.ramping = true;
+  state.spinning = true;
+  updateControls();
+  setStatus(
+    "Ramping from 0 to " + state.rpm.toFixed(1) +
+    " RPM over " + state.rampDuration.toFixed(1) + " seconds.",
+  );
 });
 
 el.pauseBtn.addEventListener("click", () => {
