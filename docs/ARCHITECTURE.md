@@ -27,7 +27,17 @@ For a source duration `D` and elapsed source time `t`:
 
 `angle(t) = startAngle + direction * degreesPerSecond * elapsedSeconds`
 
-Changing RPM or direction rebases the spin clock at the current visual angle so controls do not introduce discontinuities.
+Changing RPM or direction rebases the spin clock at the current visual angle so controls do not introduce discontinuities. Exact RPM is intentionally uncapped; the 0–3000 RPM slider is only a convenience control.
+
+### Ramp-up clock
+
+Ramp-up is a linear angular-velocity transition from 0 RPM to the selected target RPM over 0.5–60 seconds. Ramp time advances only while the spin clock is running. Pausing spin freezes both angle and ramp progress while the independent source animation continues.
+
+For target RPM `R`, ramp duration `D`, and ramp time `t`:
+
+`rpm(t) = R * t / D`
+
+The renderer integrates that velocity over elapsed time rather than approximating the ramp by changing frame count. Export snapshots include the current ramp phase so GIF and MP4 continue the same motion model from the current visual state.
 
 ## Android implementation
 
