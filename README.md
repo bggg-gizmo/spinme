@@ -9,13 +9,13 @@
 **Background Gremlin Group**  
 *Creating Unique Tools for Unique Individuals*
 
-![Version](https://img.shields.io/badge/version-0.2.0-2f81f7)
+![Version](https://img.shields.io/badge/version-1.0.0-2f81f7)
 ![Android](https://img.shields.io/badge/Android-API%2029%2B-3ddc84)
 ![Target SDK](https://img.shields.io/badge/targetSdk-36-6f42c1)
 ![Local First](https://img.shields.io/badge/processing-local--first-2ea043)
 ![Exports](https://img.shields.io/badge/export-PNG%20%7C%20GIF%20%7C%20MP4-d29922)
 
-[Download APK](releases/SpinMe-v0.2.0.apk) · [Changelog](CHANGELOG.md) · [Architecture](docs/ARCHITECTURE.md) · [Build Guide](docs/DEVELOPMENT.md)
+[Download APK](releases/SpinMe-v1.0.0.apk) · [Changelog](CHANGELOG.md) · [Architecture](docs/ARCHITECTURE.md) · [Build Guide](docs/DEVELOPMENT.md)
 
 </div>
 
@@ -35,18 +35,18 @@ SpinMe includes a native Android application and a companion browser implementat
 
 | Release | Package | Android | APK |
 | --- | --- | --- | --- |
-| **v0.2.0** | `com.spinme.app` | minSdk 29 · targetSdk 36 | **[Download SpinMe-v0.2.0.apk](releases/SpinMe-v0.2.0.apk)** |
+| **v1.0.0** | `com.spinme.app` | minSdk 29 · targetSdk 36 | **[Download SpinMe-v1.0.0.apk](releases/SpinMe-v1.0.0.apk)** |
 
 **APK SHA-256**
 
 ```text
-4429878ccbe3427dd46a33ecaa9a6b60f9a8dab261fe67325c90271513befd2b
+ec7b0d95d4a0c1ba0e7d9e5d70ce673efc28ca93c7a30624925556d0d4301389
 ```
 
 Full verification data is kept in [`releases/SHA256SUMS.txt`](releases/SHA256SUMS.txt) and [`releases/RELEASE-METADATA.txt`](releases/RELEASE-METADATA.txt). Older release artifacts are archived under [`old_bulids/`](old_bulids/).
 
 > [!IMPORTANT]
-> **v0.2.0 begins a new Android signing-key lineage.** An installed v0.1.0 cannot be upgraded in place because it was signed with a different certificate. Uninstall v0.1.0 before installing v0.2.0. Future releases intended to upgrade v0.2.0 installations must use the v0.2.0 release key.
+> **v1.0.0 uses the signing lineage introduced after v0.1.0.** An installed v0.1.0 cannot be upgraded in place because it was signed with a different certificate. Uninstall v0.1.0 before installing v1.0.0. Future releases intended to upgrade v1.0.0 installations must use the same release key.
 
 ## Highlights
 
@@ -140,19 +140,19 @@ Release keys and passwords do not belong in the repository. See [Development](do
 Verify the APK checksum:
 
 ```bash
-sha256sum releases/SpinMe-v0.2.0.apk
+sha256sum releases/SpinMe-v1.0.0.apk
 ```
 
 Expected SHA-256:
 
 ```text
-4429878ccbe3427dd46a33ecaa9a6b60f9a8dab261fe67325c90271513befd2b
+ec7b0d95d4a0c1ba0e7d9e5d70ce673efc28ca93c7a30624925556d0d4301389
 ```
 
 Verify the signing certificate with Android Build Tools:
 
 ```bash
-apksigner verify --verbose --print-certs releases/SpinMe-v0.2.0.apk
+apksigner verify --verbose --print-certs releases/SpinMe-v1.0.0.apk
 ```
 
 Expected signing-certificate SHA-256:
