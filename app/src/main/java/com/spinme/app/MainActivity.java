@@ -382,7 +382,7 @@ public final class MainActivity extends Activity {
         addSection(root, "ABOUT");
         root.addView(
             text(
-                "SpinMe v0.2.0\n" +
+                "SpinMe v1.0.0\n" +
                 "© Background Gremlin Group\n" +
                 "Creating Unique Tools for Unique Individuals\n\n" +
                 "Local-first processing. Source animation timing and spin timing are independent. " +
