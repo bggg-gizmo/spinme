@@ -17,15 +17,25 @@ public final class SpinView extends View {
     private byte[] gifData;
     private int sourceDurationMs;
     private long sourceStartMs = SystemClock.uptimeMillis();
+
     private long spinStartMs = SystemClock.uptimeMillis();
     private float startAngleDeg = 0f;
     private float rpm = 60f;
     private float direction = 1f;
+
+    private boolean ramping = false;
+    private long rampStartMs = SystemClock.uptimeMillis();
+    private long rampDurationMs = 5000L;
+    private float rampStartAngleDeg = 0f;
+
     private float scale = 1f;
     private float pivotX = .5f;
     private float pivotY = .5f;
+
     private boolean spinPaused = false;
     private float pausedAngleDeg = 0f;
+    private long pauseStartedMs = 0L;
+
     private PlaybackMode playbackMode = PlaybackMode.PING_PONG;
     private PivotListener pivotListener;
     private final Paint pivotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -33,6 +43,7 @@ public final class SpinView extends View {
 
     public SpinView(Context c) { super(c); init(); }
     public SpinView(Context c, AttributeSet a) { super(c, a); init(); }
+
     private void init() {
         setBackgroundColor(Color.rgb(12,12,12));
         pivotPaint.setColor(Color.rgb(230,184,78));
@@ -48,6 +59,7 @@ public final class SpinView extends View {
         movie = null;
         sourceDurationMs = 0;
         if (data == null || data.length == 0) { invalidate(); return; }
+
         boolean looksGif = data.length > 6 && data[0]=='G' && data[1]=='I' && data[2]=='F';
         if (looksGif) {
             Movie m = Movie.decodeByteArray(data, 0, data.length);
@@ -60,6 +72,7 @@ public final class SpinView extends View {
         if (movie == null) {
             bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
         }
+
         sourceStartMs = SystemClock.uptimeMillis();
         invalidate();
     }
@@ -73,77 +86,208 @@ public final class SpinView extends View {
     public boolean isAnimated() { return movie != null; }
     public int getSourceDurationMs() { return sourceDurationMs; }
 
-    public void setPlaybackMode(PlaybackMode mode) { playbackMode = mode; invalidate(); }
+    public void setPlaybackMode(PlaybackMode mode) {
+        playbackMode = mode;
+        invalidate();
+    }
+
     public PlaybackMode getPlaybackMode() { return playbackMode; }
 
     public void setRpm(float value) {
-        rebaseSpin();
-        rpm = Math.max(0f, Math.min(3000f, value));
+        long now = SystemClock.uptimeMillis();
+        float angle = currentAngle(now);
+        rpm = sanitizeRpm(value);
+        ramping = false;
+        startAngleDeg = angle;
+        spinStartMs = now;
+        if (spinPaused) pausedAngleDeg = angle;
+        invalidate();
     }
+
     public float getRpm() { return rpm; }
 
-    public void setDirection(boolean clockwise) {
-        rebaseSpin();
-        direction = clockwise ? 1f : -1f;
+    public void setRampDurationMs(long value) {
+        rampDurationMs = Math.max(500L, Math.min(60_000L, value));
+        if (ramping) {
+            long now = SystemClock.uptimeMillis();
+            float angle = currentAngle(now);
+            ramping = false;
+            startAngleDeg = angle;
+            spinStartMs = now;
+            if (spinPaused) pausedAngleDeg = angle;
+        }
+        invalidate();
     }
+
+    public long getRampDurationMs() { return rampDurationMs; }
+
+    public void startRamp() {
+        long now = SystemClock.uptimeMillis();
+        float angle = currentAngle(now);
+        rampStartAngleDeg = angle;
+        rampStartMs = now;
+        ramping = true;
+        spinPaused = false;
+        pauseStartedMs = 0L;
+        invalidate();
+    }
+
+    public boolean isRamping() {
+        if (!ramping) return false;
+        return rampElapsedMs(SystemClock.uptimeMillis()) < rampDurationMs;
+    }
+
+    public void setDirection(boolean clockwise) {
+        long now = SystemClock.uptimeMillis();
+        float angle = currentAngle(now);
+        long rampElapsed = ramping ? rampElapsedMs(now) : 0L;
+
+        direction = clockwise ? 1f : -1f;
+
+        if (ramping) {
+            long phase = Math.min(rampElapsed, rampDurationMs);
+            rampStartMs = now - phase;
+            rampStartAngleDeg = normalize(
+                angle - direction * rampDegreesForElapsed(phase)
+            );
+        } else {
+            startAngleDeg = angle;
+            spinStartMs = now;
+        }
+
+        if (spinPaused) pausedAngleDeg = angle;
+        invalidate();
+    }
+
     public boolean isClockwise() { return direction > 0; }
 
-    public void setScaleFactor(float value) { scale = Math.max(.1f, Math.min(3f, value)); invalidate(); }
+    public void setScaleFactor(float value) {
+        scale = Math.max(.1f, Math.min(3f, value));
+        invalidate();
+    }
+
     public float getScaleFactor() { return scale; }
 
     public void setStartAngle(float deg) {
-        startAngleDeg = normalize(deg);
-        spinStartMs = SystemClock.uptimeMillis();
-        if (spinPaused) pausedAngleDeg = startAngleDeg;
+        long now = SystemClock.uptimeMillis();
+        float desired = normalize(deg);
+
+        if (ramping) {
+            long phase = Math.min(rampElapsedMs(now), rampDurationMs);
+            rampStartAngleDeg = normalize(
+                desired - direction * rampDegreesForElapsed(phase)
+            );
+        } else {
+            startAngleDeg = desired;
+            spinStartMs = now;
+        }
+
+        if (spinPaused) pausedAngleDeg = desired;
         invalidate();
     }
 
     public void setPivot(float x, float y) {
-        pivotX = clamp01(x); pivotY = clamp01(y); invalidate();
+        pivotX = clamp01(x);
+        pivotY = clamp01(y);
+        invalidate();
     }
+
     public float getPivotXNorm() { return pivotX; }
     public float getPivotYNorm() { return pivotY; }
 
-    public void togglePause() {
-        if (spinPaused) {
-            startAngleDeg = pausedAngleDeg;
-            spinStartMs = SystemClock.uptimeMillis();
-            spinPaused = false;
-        } else {
-            pausedAngleDeg = currentAngle(SystemClock.uptimeMillis());
-            spinPaused = true;
-        }
+    public void setLightTheme(boolean light) {
+        pivotPaint.setColor(
+            light ? Color.rgb(183, 219, 214) : Color.rgb(230, 184, 78)
+        );
         invalidate();
     }
-    public boolean isSpinPaused() { return spinPaused; }
 
-    private void rebaseSpin() {
+    public void togglePause() {
         long now = SystemClock.uptimeMillis();
-        float angle = currentAngle(now);
-        startAngleDeg = angle;
-        spinStartMs = now;
-        if (spinPaused) pausedAngleDeg = angle;
+
+        if (spinPaused) {
+            long pausedFor = Math.max(0L, now - pauseStartedMs);
+            if (ramping) {
+                rampStartMs += pausedFor;
+            } else {
+                startAngleDeg = pausedAngleDeg;
+                spinStartMs = now;
+            }
+            spinPaused = false;
+            pauseStartedMs = 0L;
+        } else {
+            pausedAngleDeg = currentAngle(now);
+            pauseStartedMs = now;
+            spinPaused = true;
+        }
+
+        invalidate();
     }
+
+    public boolean isSpinPaused() { return spinPaused; }
 
     private float currentAngle(long now) {
         if (spinPaused) return pausedAngleDeg;
+
+        if (ramping) {
+            long elapsed = Math.max(0L, now - rampStartMs);
+            double rpmSeconds = rampRpmSecondsForElapsed(elapsed);
+            return normalize(
+                (float)(rampStartAngleDeg + direction * 6.0 * rpmSeconds)
+            );
+        }
+
         double seconds = Math.max(0, now - spinStartMs) / 1000.0;
-        return normalize((float)(startAngleDeg + direction * rpm * 6.0 * seconds));
+        return normalize(
+            (float)(startAngleDeg + direction * rpm * 6.0 * seconds)
+        );
     }
 
-    private long sourceElapsed(long now) { return Math.max(0, now - sourceStartMs); }
+    private long rampElapsedMs(long now) {
+        long effectiveNow = spinPaused && pauseStartedMs > 0L ? pauseStartedMs : now;
+        return Math.max(0L, effectiveNow - rampStartMs);
+    }
+
+    private double rampRpmSecondsForElapsed(long elapsedMs) {
+        double durationSeconds = Math.max(0.001, rampDurationMs / 1000.0);
+        double elapsedSeconds = Math.max(0L, elapsedMs) / 1000.0;
+        double rampSeconds = Math.min(elapsedSeconds, durationSeconds);
+
+        double rpmSeconds =
+            rpm * (rampSeconds * rampSeconds) / (2.0 * durationSeconds);
+
+        if (elapsedSeconds > durationSeconds) {
+            rpmSeconds += rpm * (elapsedSeconds - durationSeconds);
+        }
+
+        return rpmSeconds;
+    }
+
+    private float rampDegreesForElapsed(long elapsedMs) {
+        return (float)(6.0 * rampRpmSecondsForElapsed(elapsedMs));
+    }
+
+    private long sourceElapsed(long now) {
+        return Math.max(0, now - sourceStartMs);
+    }
 
     public static int mapSourcePosition(long elapsedMs, int durationMs, PlaybackMode mode) {
         if (durationMs <= 1) return 0;
-        if (mode == PlaybackMode.ONCE) return (int)Math.min(durationMs - 1L, elapsedMs);
-        if (mode == PlaybackMode.LOOP) return (int)(elapsedMs % durationMs);
+        if (mode == PlaybackMode.ONCE) {
+            return (int)Math.min(durationMs - 1L, elapsedMs);
+        }
+        if (mode == PlaybackMode.LOOP) {
+            return (int)(elapsedMs % durationMs);
+        }
+
         long period = durationMs * 2L;
         long phase = elapsedMs % period;
         long mapped = phase < durationMs ? phase : period - phase;
         return (int)Math.min(durationMs - 1L, mapped);
     }
 
-    @Override protected void onDraw(Canvas canvas) {
+    @Override
+    protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         long now = SystemClock.uptimeMillis();
         drawMedia(canvas, getWidth(), getHeight(), currentAngle(now), sourceElapsed(now));
@@ -151,18 +295,32 @@ public final class SpinView extends View {
         postInvalidateOnAnimation();
     }
 
-    private void drawMedia(Canvas canvas, int width, int height, float angle, long sourceElapsedMs) {
+    private void drawMedia(
+        Canvas canvas,
+        int width,
+        int height,
+        float angle,
+        long sourceElapsedMs
+    ) {
         if (!hasMedia() || width <= 0 || height <= 0) return;
+
         int sw = movie != null ? movie.width() : bitmap.getWidth();
         int sh = movie != null ? movie.height() : bitmap.getHeight();
         if (sw <= 0 || sh <= 0) return;
+
         float base = Math.min(width / (float)sw, height / (float)sh) * scale;
-        float dw = sw * base, dh = sh * base;
-        float left = (width - dw) * .5f, top = (height - dh) * .5f;
+        float dw = sw * base;
+        float dh = sh * base;
+        float left = (width - dw) * .5f;
+        float top = (height - dh) * .5f;
+
         canvas.save();
         canvas.rotate(angle, pivotX * width, pivotY * height);
+
         if (movie != null) {
-            movie.setTime(mapSourcePosition(sourceElapsedMs, sourceDurationMs, playbackMode));
+            movie.setTime(
+                mapSourcePosition(sourceElapsedMs, sourceDurationMs, playbackMode)
+            );
             canvas.save();
             canvas.translate(left, top);
             canvas.scale(base, base);
@@ -172,32 +330,53 @@ public final class SpinView extends View {
             RectF dst = new RectF(left, top, left + dw, top + dh);
             canvas.drawBitmap(bitmap, null, dst, bitmapPaint);
         }
+
         canvas.restore();
     }
 
     private void drawPivot(Canvas c) {
-        float x = pivotX * getWidth(), y = pivotY * getHeight(), r = dp(10);
+        float x = pivotX * getWidth();
+        float y = pivotY * getHeight();
+        float r = dp(10);
+
         c.drawCircle(x, y, r, pivotPaint);
-        c.drawLine(x-r*1.6f,y,x+r*1.6f,y,pivotPaint);
-        c.drawLine(x,y-r*1.6f,x,y+r*1.6f,pivotPaint);
+        c.drawLine(x-r*1.6f, y, x+r*1.6f, y, pivotPaint);
+        c.drawLine(x, y-r*1.6f, x, y+r*1.6f, pivotPaint);
     }
 
-    @Override public boolean onTouchEvent(MotionEvent e) {
-        if (e.getActionMasked() == MotionEvent.ACTION_DOWN || e.getActionMasked() == MotionEvent.ACTION_MOVE) {
+    @Override
+    public boolean onTouchEvent(MotionEvent e) {
+        if (
+            e.getActionMasked() == MotionEvent.ACTION_DOWN ||
+            e.getActionMasked() == MotionEvent.ACTION_MOVE
+        ) {
             if (getWidth() > 0 && getHeight() > 0) {
-                setPivot(e.getX()/getWidth(), e.getY()/getHeight());
-                if (pivotListener != null) pivotListener.onPivotChanged(pivotX, pivotY);
+                setPivot(
+                    e.getX() / getWidth(),
+                    e.getY() / getHeight()
+                );
+                if (pivotListener != null) {
+                    pivotListener.onPivotChanged(pivotX, pivotY);
+                }
                 return true;
             }
         }
+
         return e.getActionMasked() == MotionEvent.ACTION_UP || super.onTouchEvent(e);
     }
 
     public Snapshot snapshot() {
         long now = SystemClock.uptimeMillis();
         Snapshot s = new Snapshot();
-        s.bitmap = bitmap == null ? null : bitmap.copy(Bitmap.Config.ARGB_8888, false);
-        s.gifData = gifData == null ? null : Arrays.copyOf(gifData, gifData.length);
+
+        s.bitmap =
+            bitmap == null
+                ? null
+                : bitmap.copy(Bitmap.Config.ARGB_8888, false);
+        s.gifData =
+            gifData == null
+                ? null
+                : Arrays.copyOf(gifData, gifData.length);
         s.durationMs = sourceDurationMs;
         s.sourceElapsedMs = sourceElapsed(now);
         s.angleDeg = currentAngle(now);
@@ -207,6 +386,12 @@ public final class SpinView extends View {
         s.pivotX = pivotX;
         s.pivotY = pivotY;
         s.mode = playbackMode;
+        s.rampDurationMs = rampDurationMs;
+
+        long rampElapsed = ramping ? rampElapsedMs(now) : 0L;
+        s.rampElapsedMs = Math.min(rampElapsed, rampDurationMs);
+        s.ramping = ramping && rampElapsed < rampDurationMs;
+
         return s;
     }
 
@@ -215,13 +400,41 @@ public final class SpinView extends View {
         public byte[] gifData;
         public int durationMs;
         public long sourceElapsedMs;
-        public float angleDeg, rpm, direction, scale, pivotX, pivotY;
+        public float angleDeg;
+        public float rpm;
+        public float direction;
+        public float scale;
+        public float pivotX;
+        public float pivotY;
         public PlaybackMode mode;
+        public boolean ramping;
+        public long rampElapsedMs;
+        public long rampDurationMs;
+
         public boolean animated() { return gifData != null; }
-        public void close() { if (bitmap != null && !bitmap.isRecycled()) bitmap.recycle(); }
+
+        public void close() {
+            if (bitmap != null && !bitmap.isRecycled()) {
+                bitmap.recycle();
+            }
+        }
     }
 
-    private static float normalize(float d) { float v=d%360f; return v<0?v+360f:v; }
-    private static float clamp01(float v) { return Math.max(0f, Math.min(1f,v)); }
-    private float dp(float n) { return n * getResources().getDisplayMetrics().density; }
+    private static float sanitizeRpm(float value) {
+        if (Float.isNaN(value) || Float.isInfinite(value)) return 0f;
+        return Math.max(0f, value);
+    }
+
+    private static float normalize(float d) {
+        float v = d % 360f;
+        return v < 0 ? v + 360f : v;
+    }
+
+    private static float clamp01(float v) {
+        return Math.max(0f, Math.min(1f, v));
+    }
+
+    private float dp(float n) {
+        return n * getResources().getDisplayMetrics().density;
+    }
 }
