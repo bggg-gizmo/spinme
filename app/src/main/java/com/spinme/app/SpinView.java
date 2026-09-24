@@ -236,9 +236,17 @@ public final class SpinView extends View {
         if (ramping) {
             long elapsed = Math.max(0L, now - rampStartMs);
             double rpmSeconds = rampRpmSecondsForElapsed(elapsed);
-            return normalize(
+            float angle = normalize(
                 (float)(rampStartAngleDeg + direction * 6.0 * rpmSeconds)
             );
+
+            if (elapsed >= rampDurationMs) {
+                ramping = false;
+                startAngleDeg = angle;
+                spinStartMs = now;
+            }
+
+            return angle;
         }
 
         double seconds = Math.max(0, now - spinStartMs) / 1000.0;
