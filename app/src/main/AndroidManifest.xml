@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.spinme.app">
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SpinMe">
+        <meta-data android:name="com.spinme.creator" android:value="Background Gremlin Group" />
+        <meta-data android:name="com.spinme.organization" android:value="Background Gremlin Group" />
+        <meta-data android:name="com.spinme.publisher" android:value="Background Gremlin Group" />
+        <meta-data android:name="com.spinme.tagline" android:value="Creating Unique Tools for Unique Individuals" />
+        <meta-data android:name="com.spinme.credit" android:value="Background Gremlin Group — Creating Unique Tools for Unique Individuals" />
+        <meta-data android:name="com.spinme.copyright" android:value="© 2026 Background Gremlin Group" />
+        <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="unspecified">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

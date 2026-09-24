@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090a0b" />
+  <meta name="description" content="SpinMe by Background Gremlin Group — Creating Unique Tools for Unique Individuals. Spin images and GIFs without changing the source animation clock." />\n  <meta name="author" content="Background Gremlin Group" />\n  <meta name="publisher" content="Background Gremlin Group" />\n  <meta name="application-name" content="SpinMe" />
+  <link rel="icon" type="image/webp" href="/icon.webp" />
+  <link rel="apple-touch-icon" href="/icon.webp" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <title>SpinMe</title>
+</head>
+<body>
+  <div id="app">
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>SPINME</h1>
+          <p>Independent source + spin clocks</p>\n          <small>Background Gremlin Group — Creating Unique Tools for Unique Individuals</small>
+        </div>
+        <div class="top-actions">
+          <button id="openBtn" class="icon-button" type="button" title="Open media">OPEN</button>
+          <button id="themeBtn" class="icon-button" type="button" title="Toggle theme">THEME</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <div class="preview-column">
+          <div id="dropZone" class="preview-deck">
+            <div id="spinnerLayer" class="spinner-layer">
+              <img id="sourceImage" alt="" />
+              <canvas id="sourceCanvas" aria-label="Animated source preview"></canvas>
+            </div>
+            <div id="pivotMarker" class="pivot-marker" aria-hidden="true"></div>
+            <div id="emptyState" class="empty-state">
+              <strong>DROP IN THE SOURCE</strong>
+              <span>GIF • PNG • JPEG • WebP</span>
+              <button id="emptyOpenBtn" class="secondary-button" type="button">Choose media</button>
+            </div>
+          </div>
+          <div class="statusbar">
+            <span id="sourceStatus">No source loaded</span>
+            <span id="angleStatus">0.0°</span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <section class="panel">
+            <div class="section-heading"><span>LIVE SPIN</span><strong id="rpmReadout">60.0 RPM</strong></div>
+
+            <label class="control-label" for="rpmRange">Spin speed</label>
+            <input id="rpmRange" type="range" min="0" max="3000" step="1" value="60" />
+
+            <div class="preset-row">
+              <button class="chip rpm-preset" data-rpm="30" type="button">30</button>
+              <button class="chip rpm-preset" data-rpm="60" type="button">60</button>
+              <button class="chip rpm-preset" data-rpm="350" type="button">350</button>
+              <button class="chip rpm-preset" data-rpm="1000" type="button">1k</button>
+              <button class="chip rpm-preset" data-rpm="3000" type="button">3k</button>
+            </div>
+
+            <label class="field">
+              <span>Exact RPM</span>
+              <input id="rpmInput" type="number" min="0" max="3000" step="0.1" value="60" />
+              <small>Spin clock only. GIF frame timing never changes.</small>
+            </label>
+
+            <div class="button-grid">
+              <button id="pauseBtn" class="secondary-button" type="button">Pause spin</button>
+              <button id="directionBtn" class="secondary-button" type="button">Clockwise</button>
+              <button id="zeroBtn" class="secondary-button" type="button">Zero angle</button>
+            </div>
+
+            <div class="subheading-row">
+              <span>SOURCE PLAYBACK</span>
+              <strong id="playbackLabel">PING-PONG</strong>
+            </div>
+            <div class="segmented playback-segmented">
+              <button class="playback-button active" data-playback="pingpong" type="button">PING-PONG</button>
+              <button class="playback-button" data-playback="loop" type="button">LOOP</button>
+              <button class="playback-button" data-playback="once" type="button">ONCE</button>
+            </div>
+            <p class="hint">Ping-pong is the default so even one-shot GIFs stay animated forever.</p>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading"><span>PIVOT & SCALE</span><strong>LIVE</strong></div>
+
+            <div class="slider-row">
+              <label for="pivotX">Pivot X</label>
+              <output id="pivotXOut">50%</output>
+            </div>
+            <input id="pivotX" type="range" min="0" max="100" step="1" value="50" />
+
+            <div class="slider-row">
+              <label for="pivotY">Pivot Y</label>
+              <output id="pivotYOut">50%</output>
+            </div>
+            <input id="pivotY" type="range" min="0" max="100" step="1" value="50" />
+
+            <div class="slider-row">
+              <label for="zoom">Scale</label>
+              <output id="zoomOut">86%</output>
+            </div>
+            <input id="zoom" type="range" min="25" max="130" step="1" value="86" />
+
+            <button id="centerBtn" class="text-button" type="button">Center & fit</button>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading"><span>EXPORT</span><strong id="formatLabel">ANIMATED GIF</strong></div>
+
+            <div class="segmented">
+              <button class="format-button" data-format="png" type="button">PNG</button>
+              <button class="format-button active" data-format="gif" type="button">GIF</button>
+              <button class="format-button" data-format="webm" type="button">WEBM</button>
+            </div>
+
+            <div id="motionExportControls">
+              <div class="slider-row">
+                <label for="fps">Output FPS</label>
+                <output id="fpsOut">60</output>
+              </div>
+              <input id="fps" type="range" min="1" max="100" step="1" value="60" />
+
+              <div class="slider-row">
+                <label for="duration">Duration</label>
+                <output id="durationOut">4.0s</output>
+              </div>
+              <input id="duration" type="range" min="0.5" max="20" step="0.5" value="4" />
+            </div>
+
+            <div class="slider-row">
+              <label for="size">Resolution</label>
+              <output id="sizeOut">1080</output>
+            </div>
+            <select id="size">
+              <option value="512">512 × 512</option>
+              <option value="720">720 × 720</option>
+              <option value="1080" selected>1080 × 1080</option>
+              <option value="1440">1440 × 1440</option>
+            </select>
+
+            <label class="toggle-row">
+              <span>Transparent background</span>
+              <input id="transparentBg" type="checkbox" checked />
+            </label>
+
+            <p id="exportHint" class="hint">The source GIF stays on its native timeline while output frames sample the spin clock.</p>
+
+            <div id="progressWrap" class="progress-wrap" hidden>
+              <div id="progressBar" class="progress-bar"></div>
+            </div>
+
+            <button id="exportBtn" class="primary-button" type="button" disabled>Export GIF</button>
+            <p id="statusText" class="status-text">Load an image or GIF to begin.</p>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <input id="fileInput" type="file" accept="image/gif,image/png,image/jpeg,image/webp" hidden />
+    <canvas id="renderCanvas" hidden></canvas>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

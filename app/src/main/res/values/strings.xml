@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SpinMe</string>
+    <string name="creator_name">Background Gremlin Group</string>
+    <string name="creator_tagline">Creating Unique Tools for Unique Individuals</string>
+    <string name="creator_credit">Background Gremlin Group — Creating Unique Tools for Unique Individuals</string>
+</resources>

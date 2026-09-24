@@ -1,148 +1,70 @@
 # SpinMe
 
-SpinMe is a local-first image and GIF spinner for Android with a companion web build.
+**Background Gremlin Group — Creating Unique Tools for Unique Individuals**
 
-The defining behavior is simple: **source animation timing and spin timing are independent**. An animated GIF keeps its own frame delays while the entire image layer rotates from a separate continuous clock.
+SpinMe is a local-first Android image/GIF spinner with a companion web build. Its defining rule is that the source animation clock and the spin clock are independent: changing RPM never changes the source GIF timing.
 
-[Watch or download the 22-second demo](demo/SpinMe_Demo_22s.mp4)
+## Download
 
-## Highlights
+[Download SpinMe v0.1.0 APK](releases/SpinMe-v0.1.0.apk)
 
-- Import GIF, PNG, JPEG, and WebP.
-- Live spinning preview with controls that update while the source keeps animating.
-- Spin speed from 0 to 3000 RPM.
-- Clockwise and counter-clockwise rotation.
-- Pause/resume spin without pausing the source animation.
-- Source playback modes: Ping-pong, Loop, and Once.
-- Ping-pong is the default so one-shot GIFs remain continuously animated.
-- Drag the pivot directly on the preview or use X/Y sliders.
-- Independent scale, start angle, export duration, and output FPS controls.
-- Dark theme: black carbon fiber with metallic gold inlays.
-- Light theme: ivory carbon fiber with mother-of-pearl inlays.
-- Full-bleed hypnotic spiral launcher/web icon with no added white padding.
-- Local processing; media does not need to be uploaded to a server.
+- Package: `com.spinme.app`
+- Version: `0.1.0` (versionCode 1)
+- minSdk: 29
+- targetSdk: 36
+- SHA-256: `0c62c3362d3074d3adecc7709d4dddae904d5345693ab3c8a23cb6cbefdef5dc`
+- Publisher/creator: **Background Gremlin Group**
+- Tagline: **Creating Unique Tools for Unique Individuals**
 
-## Platform matrix
+The APK is signed with the Background Gremlin Group release certificate. See [releases/SHA256SUMS.txt](releases/SHA256SUMS.txt).
 
-| Capability | Android | Web |
-| --- | --- | --- |
-| GIF / PNG / JPEG / WebP input | Yes | Yes |
-| Native animated-source preview | Yes | Yes |
-| Ping-pong / Loop / Once | Yes | Yes* |
-| Live RPM control | Yes | Yes |
-| Direct pivot dragging | Yes | Yes |
-| Dark / light material themes | Yes | Yes |
-| PNG export | Yes | Yes |
-| Animated GIF export | Yes | Yes |
-| MP4 export | Yes | No |
-| WebM export | No | Yes |
+## Android features
 
-\* Web ping-pong uses browser `ImageDecoder` when available. If deterministic frame decoding is unavailable, SpinMe falls back to the browser's native animated-image playback.
+- GIF, PNG, JPEG, and WebP input through Android's document picker.
+- Native animated GIF playback while the complete media layer spins.
+- Source playback modes: Ping-pong (default), Loop, and Once.
+- Independent spin clock from 0 to 3000 RPM.
+- Clockwise/counter-clockwise direction and spin pause/resume.
+- Adjustable start angle, scale, pivot X/Y, and direct pivot dragging on the preview.
+- Output sizes: 512, 720, 1080, and 1440 square.
+- Animated export duration from 0.5 to 20 seconds.
+- PNG, animated GIF, and MP4 export.
+- GIF export up to 100 FPS; MP4 export up to 240 FPS.
+- Dark and light presentation modes.
+- Local processing only; imported media is not sent to a server.
 
 ## Timing model
 
-Rotation is derived from elapsed time, not frame count:
+`degreesPerSecond = rpm * 6`
 
-```text
-degreesPerSecond = rpm * 6
-angle(t) = startAngle + direction * degreesPerSecond * t
-```
+Spin angle is calculated from elapsed time. Animated-source timing is calculated separately from the source duration and selected playback mode. Export samples both clocks at each output timestamp.
 
-For source playback, SpinMe tracks a separate source clock. Ping-pong maps that clock onto a triangle wave:
+## Build
 
-```text
-phase = sourceTime mod (2 * duration)
+The Android app has no third-party runtime dependencies. Two build paths are included:
 
-if phase < duration:
-    sourcePosition = phase
-else:
-    sourcePosition = 2 * duration - phase
-```
+1. Standard Android Studio/Gradle project files.
+2. [tools/build-apk.sh](tools/build-apk.sh), which can build directly with JDK + Android SDK Platform 36 / Build Tools 36.0.0.
 
-The renderer samples both clocks at the current timestamp:
-
-```text
-sourceFrame = source.frameAt(sourcePosition(t))
-rotation    = spinAngle(t)
-outputFrame = rotate(sourceFrame, rotation)
-```
-
-Changing RPM never changes GIF frame timing. Changing output FPS only changes how often the combined state is sampled for an export.
-
-## Android
-
-Current project configuration:
-
-- Application ID: `com.spinme.app`
-- minSdk: 29
-- compileSdk: 36
-- targetSdk: 36
-- Java: 17
-- Android Gradle Plugin: 9.1.1
-- Gradle: 9.3.1
-- Kotlin / Compose compiler plugin: 2.4.20
-- Jetpack Compose BOM: 2026.09.00
-- Media3: 1.11.1
-- android-gif-drawable: 1.2.32
-
-Build:
-
-```bash
-gradle :app:assembleDebug
-```
-
-Run timing tests:
-
-```bash
-gradle :app:testDebugUnitTest
-```
-
-The debug APK is written to:
-
-```text
-app/build/outputs/apk/debug/app-debug.apk
-```
+The release signing keystore and passwords are intentionally **not** stored in this repository.
 
 ## Web
 
-Requirements: Node.js 22 and npm.
+The `web/` project is the companion browser implementation.
 
-```bash
-cd web
-npm install
-npm run dev
-```
-
-Production build:
-
-```bash
-npm run build
-```
-
-The built site is written to `web/dist/`.
-
-## Repository layout
-
-```text
-app/                 Android application
-web/                 Browser build
-demo/                Product demo video and notes
-docs/                Architecture, development, export, and branding documentation
-```
+`cd web && npm install && npm run dev`
 
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Development](docs/DEVELOPMENT.md)
 - [Export behavior](docs/EXPORTS.md)
-- [Branding and artwork](docs/BRANDING.md)
-- [Demo video](demo/README.md)
+- [Branding and credits](docs/BRANDING.md)
+- [Security](SECURITY.md)
+- [Changelog](CHANGELOG.md)
 
-## Security
+## Credits
 
-Please do not disclose suspected vulnerabilities in a public issue. Use GitHub private vulnerability reporting for this repository once enabled, or follow the instructions in [SECURITY.md](SECURITY.md).
+SpinMe is created and published by **Background Gremlin Group**.
 
-## Release
-
-Current public release: **v0.1.0**.
-See [CHANGELOG.md](CHANGELOG.md) for release notes.
+**Creating Unique Tools for Unique Individuals.**

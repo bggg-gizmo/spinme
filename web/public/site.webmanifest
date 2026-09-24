@@ -1,0 +1,16 @@
+{
+  "name": "SpinMe",
+  "short_name": "SpinMe",
+  "icons": [
+    {
+      "src": "/icon.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#090a0b",
+  "background_color": "#090a0b",
+  "display": "standalone",
+  "description": "SpinMe by Background Gremlin Group — Creating Unique Tools for Unique Individuals"
+}\n
