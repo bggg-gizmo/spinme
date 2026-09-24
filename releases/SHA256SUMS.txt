@@ -1,1 +1,2 @@
-0c62c3362d3074d3adecc7709d4dddae904d5345693ab3c8a23cb6cbefdef5dc  SpinMe-v0.1.0.apk
+# SpinMe v0.2.0
+# Pending release signing. Replace this file with the SHA-256 of releases/SpinMe-v0.2.0.apk after signing and verification.
