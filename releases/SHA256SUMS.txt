@@ -1,2 +1,2 @@
-# SpinMe v0.2.0
-4429878ccbe3427dd46a33ecaa9a6b60f9a8dab261fe67325c90271513befd2b  SpinMe-v0.2.0.apk
+# SpinMe v1.0.0
+ec7b0d95d4a0c1ba0e7d9e5d70ce673efc28ca93c7a30624925556d0d4301389  SpinMe-v1.0.0.apk
