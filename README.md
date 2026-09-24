@@ -18,6 +18,8 @@ SpinMe is a local-first Android image/GIF spinner with a companion web build. It
 
 Release artifact verification is recorded in [releases/SHA256SUMS.txt](releases/SHA256SUMS.txt) and [releases/RELEASE-METADATA.txt](releases/RELEASE-METADATA.txt).
 
+**Signing note:** v0.2.0 starts a new signing-key lineage. Because v0.1.0 used a different certificate, Android requires v0.1.0 to be uninstalled before installing v0.2.0. Keep the v0.2.0 release key for all future in-place upgrades from this release line.
+
 ## Android features
 
 - GIF, PNG, JPEG, and WebP input through Android's document picker.
