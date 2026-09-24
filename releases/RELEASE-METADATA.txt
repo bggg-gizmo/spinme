@@ -6,7 +6,7 @@ Version Code: 2
 Version Name: 0.2.0
 minSdk: 29
 targetSdk: 36
-APK SHA-256: f229ef5a2008d4b2edcbb0c4756d60ba3ccdf08fcb9646787cdd20a2ad9b851b
+APK SHA-256: 4429878ccbe3427dd46a33ecaa9a6b60f9a8dab261fe67325c90271513befd2b
 Signing Certificate SHA-256: bcfd9417869e6671e2f33efa7345cd49c0f4a9452d014f1d1fab67de2e166093
 Signing Certificate DN: CN=Background Gremlin Group, OU=Creating Unique Tools for Unique Individuals, O=Background Gremlin Group
 Signing Key Lineage: v0.2.0 starts a new signing lineage. It is not signed with the v0.1.0 certificate.
