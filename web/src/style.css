@@ -55,6 +55,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   border-radius: 26px;
   border: 1px solid transparent;
   background:
+    repeating-linear-gradient(45deg, transparent 0 7px, var(--fiber-a) 7px 11px, transparent 11px 18px) padding-box,
+    repeating-linear-gradient(-45deg, transparent 0 8px, var(--fiber-b) 8px 10px, transparent 10px 18px) padding-box,
     linear-gradient(var(--panel), var(--panel)) padding-box,
     var(--inlay) border-box;
   box-shadow: var(--shadow);
@@ -196,8 +198,13 @@ html[data-theme="light"] .preview-deck {
 .panel {
   padding: 16px;
   border-radius: 20px;
-  border: 1px solid rgba(127,127,127,.18);
-  background: linear-gradient(180deg, rgba(127,127,127,.035), transparent), var(--panel);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, rgba(127,127,127,.035), transparent) padding-box,
+    repeating-linear-gradient(45deg, transparent 0 7px, var(--fiber-a) 7px 11px, transparent 11px 18px) padding-box,
+    repeating-linear-gradient(-45deg, transparent 0 8px, var(--fiber-b) 8px 10px, transparent 10px 18px) padding-box,
+    linear-gradient(var(--panel), var(--panel)) padding-box,
+    var(--inlay) border-box;
 }
 
 .section-heading {
@@ -271,6 +278,11 @@ input[type="range"] {
 
 .field input:focus, select:focus { border-color: var(--accent); }
 .field small, .hint { color: var(--muted); font-size: 11px; line-height: 1.45; }
+
+.ramp-button {
+  width: 100%;
+  margin-top: 8px;
+}
 
 .button-grid {
   display: grid;
