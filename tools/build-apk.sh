@@ -59,6 +59,8 @@ if [[ -n "${SPINME_KEYSTORE:-}" ]]; then
     --out "$OUT/SpinMe-v1.0.0.apk" \
     "$OUT/SpinMe-v1.0.0-aligned-unsigned.apk"
   "$BT/apksigner" verify --verbose --print-certs "$OUT/SpinMe-v1.0.0.apk"
+  "$BT/zipalign" -c -p 4 "$OUT/SpinMe-v1.0.0.apk"
+  unzip -t "$OUT/SpinMe-v1.0.0.apk"
   sha256sum "$OUT/SpinMe-v1.0.0.apk"
 else
   echo "Unsigned aligned APK: $OUT/SpinMe-v1.0.0-aligned-unsigned.apk"
