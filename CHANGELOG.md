@@ -7,6 +7,7 @@
 - Ramp progress pauses with spin pause and is preserved in animated exports.
 - Carbon-fiber surfaces and gold/mother-of-pearl inlay accents are rendered directly in the existing UI surfaces.
 - Launcher resources use the full-bleed spiral artwork without a white backing cell or baked-in padding.
+- v0.2.0 starts a new Android signing-key lineage; v0.1.0 must be uninstalled before installing v0.2.0 because the package signatures differ.
 - Fixed public web metadata files containing literal `\\n` sequences.
 - Preserved all existing import, playback, pivot, scale, theme, PNG, GIF, MP4, and web export features.
 
