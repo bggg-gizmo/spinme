@@ -888,7 +888,10 @@ el.themeBtn.addEventListener("click", () => {
 });
 
 function setRpm(value) {
-  state.rpm = Math.max(0, Number(value) || 0);
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return;
+
+  state.rpm = Math.max(0, parsed);
   if (state.rpm > state.rpmRangeMax) {
     state.rpmRangeMax = Math.max(
       3000,
