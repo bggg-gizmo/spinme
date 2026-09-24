@@ -1,74 +1,205 @@
+<div align="center">
+
+<img src="app/src/main/res/drawable-nodpi/ic_launcher_art.webp" width="160" alt="SpinMe spiral logo">
+
 # SpinMe
 
-**Background Gremlin Group — Creating Unique Tools for Unique Individuals**
+**Independent image rotation for Android and the web.**
 
-SpinMe is a local-first Android image/GIF spinner with a companion web build. Its defining rule is that the source animation clock and the spin clock are independent: changing RPM never changes the source GIF timing.
+**Background Gremlin Group**  
+*Creating Unique Tools for Unique Individuals*
 
-## Download
+![Version](https://img.shields.io/badge/version-0.2.0-2f81f7)
+![Android](https://img.shields.io/badge/Android-API%2029%2B-3ddc84)
+![Target SDK](https://img.shields.io/badge/targetSdk-36-6f42c1)
+![Local First](https://img.shields.io/badge/processing-local--first-2ea043)
+![Exports](https://img.shields.io/badge/export-PNG%20%7C%20GIF%20%7C%20MP4-d29922)
 
-[Download SpinMe v0.2.0 APK](releases/SpinMe-v0.2.0.apk)
+[Download APK](releases/SpinMe-v0.2.0.apk) · [Changelog](CHANGELOG.md) · [Architecture](docs/ARCHITECTURE.md) · [Build Guide](docs/DEVELOPMENT.md)
 
-- Package: `com.spinme.app`
-- Version: `0.2.0` (versionCode 2)
-- minSdk: 29
-- targetSdk: 36
-- APK path on `main`: [`releases/SpinMe-v0.2.0.apk`](releases/SpinMe-v0.2.0.apk)
-- SHA-256: `4429878ccbe3427dd46a33ecaa9a6b60f9a8dab261fe67325c90271513befd2b`
-- Publisher/creator: **Background Gremlin Group**
-- Tagline: **Creating Unique Tools for Unique Individuals**
+</div>
 
-Release artifact verification is recorded in [releases/SHA256SUMS.txt](releases/SHA256SUMS.txt) and [releases/RELEASE-METADATA.txt](releases/RELEASE-METADATA.txt).
+---
 
-**Signing note:** v0.2.0 starts a new signing-key lineage. Because v0.1.0 used a different certificate, Android requires v0.1.0 to be uninstalled before installing v0.2.0. Keep the v0.2.0 release key for all future in-place upgrades from this release line.
+## Overview
 
-## Android features
+SpinMe is a local-first image and animated-GIF spinner built around one non-negotiable timing rule:
 
-- GIF, PNG, JPEG, and WebP input through Android's document picker.
-- Native animated GIF playback while the complete media layer spins.
-- Source playback modes: Ping-pong (default), Loop, and Once.
-- User-defined spin speed with no fixed RPM ceiling; the existing 0–3000 RPM slider remains for convenient adjustment, while exact RPM entry accepts higher values such as 20,000+ RPM.
-- Linear ramp-up mode from 0 RPM to the selected target speed with an adjustable 0.5–60 second duration.
-- Clockwise/counter-clockwise direction and spin pause/resume.
-- Adjustable start angle, scale, pivot X/Y, and direct pivot dragging on the preview.
-- Output sizes: 512, 720, 1080, and 1440 square.
-- Animated export duration from 0.5 to 20 seconds.
-- PNG, animated GIF, and MP4 export.
-- GIF export up to 100 FPS; MP4 export up to 240 FPS.
-- Dark and light presentation modes.
-- Local processing only; imported media is not sent to a server.
+> **The source animation clock and the rotation clock are independent.**
+
+Changing RPM changes rotation speed only. It does not speed up, slow down, or otherwise alter the timing of an animated source. Preview and export use the same timing model so the rendered result tracks what you see in the app.
+
+SpinMe includes a native Android application and a companion browser implementation.
+
+## Get SpinMe
+
+| Release | Package | Android | APK |
+| --- | --- | --- | --- |
+| **v0.2.0** | `com.spinme.app` | minSdk 29 · targetSdk 36 | **[Download SpinMe-v0.2.0.apk](releases/SpinMe-v0.2.0.apk)** |
+
+**APK SHA-256**
+
+```text
+4429878ccbe3427dd46a33ecaa9a6b60f9a8dab261fe67325c90271513befd2b
+```
+
+Full verification data is kept in [`releases/SHA256SUMS.txt`](releases/SHA256SUMS.txt) and [`releases/RELEASE-METADATA.txt`](releases/RELEASE-METADATA.txt). Older release artifacts are archived under [`old_bulids/`](old_bulids/).
+
+> [!IMPORTANT]
+> **v0.2.0 begins a new Android signing-key lineage.** An installed v0.1.0 cannot be upgraded in place because it was signed with a different certificate. Uninstall v0.1.0 before installing v0.2.0. Future releases intended to upgrade v0.2.0 installations must use the v0.2.0 release key.
+
+## Highlights
+
+| Area | Capability |
+| --- | --- |
+| **Input** | GIF, PNG, JPEG, and WebP through Android's document picker |
+| **Animated sources** | Native animated GIF playback with Ping-pong, Loop, and Once modes |
+| **RPM** | Existing 0–3000 RPM slider plus uncapped exact RPM entry; 20,000+ RPM is supported |
+| **Ramp-up** | Automatic linear ramp from 0 RPM to the selected target over 0.5–60 seconds |
+| **Direction** | Clockwise and counter-clockwise rotation |
+| **Spin state** | Pause/resume rotation without pausing the source animation |
+| **Transform** | Start angle, scale, normalized pivot X/Y, and direct pivot dragging |
+| **Output sizes** | 512, 720, 1080, and 1440 square |
+| **Animated duration** | 0.5–20 seconds |
+| **Export** | PNG, animated GIF, and H.264 MP4 |
+| **Frame rates** | GIF up to 100 FPS; MP4 up to 240 FPS |
+| **Appearance** | Dark carbon-fiber surfaces with gold inlays; light ivory carbon fiber with mother-of-pearl inlays |
+| **Processing** | Imported media is processed locally rather than uploaded to a remote service |
 
 ## Timing model
 
-`degreesPerSecond = rpm * 6`
+Spin velocity is derived directly from elapsed time:
 
-Spin angle is calculated from elapsed time. Animated-source timing is calculated separately from the source duration and selected playback mode. Export samples both clocks at each output timestamp.
+```text
+degreesPerSecond = rpm × 6
+```
 
-## Build
+The source-animation phase is calculated separately from the spin phase. Output FPS controls sampling density; it does **not** define angular velocity.
 
-The Android app has no third-party runtime dependencies. Two build paths are included:
+The core invariants are:
 
-1. Standard Android Studio/Gradle project files.
-2. [tools/build-apk.sh](tools/build-apk.sh), which can build directly with JDK + Android SDK Platform 36 / Build Tools 36.0.0.
+1. RPM never changes source-animation timing.
+2. Pausing spin does not pause the animated source.
+3. Direction changes affect rotation only.
+4. Playback mode affects the source clock only.
+5. Export begins from the current visual/source state.
+6. Ramp progress is preserved in animated exports.
+7. Pivot coordinates remain normalized to the output canvas.
 
-The release signing keystore and passwords are intentionally **not** stored in this repository.
+For the implementation model, see [Architecture](docs/ARCHITECTURE.md) and [Export behavior](docs/EXPORTS.md).
 
-## Web
+## Export behavior
 
-The `web/` project is the companion browser implementation.
+SpinMe separates motion from sampling so high frame rates improve temporal resolution without changing the requested RPM.
 
-`cd web && npm install && npm run dev`
+| Format | Behavior |
+| --- | --- |
+| **PNG** | Captures the current rendered frame |
+| **Animated GIF** | Samples source and spin clocks independently at the selected GIF FPS |
+| **MP4** | Samples the same state model into H.264 video at the selected MP4 FPS |
+
+Ramp-up exports continue from the current ramp phase rather than restarting the ramp at frame zero.
+
+## Build the Android app
+
+The Android application has no third-party runtime dependencies.
+
+### Requirements
+
+- JDK 17+
+- Android SDK Platform 36
+- Android Build Tools 36.0.0
+
+### Android Studio / Gradle
+
+Open the repository in Android Studio and build the `app` module normally.
+
+### Direct SDK build
+
+A direct build path is also included for environments where Gradle is not desired:
+
+```bash
+ANDROID_SDK_ROOT=/path/to/sdk ./tools/build-apk.sh
+```
+
+For a signed build, pass signing material through environment variables:
+
+```bash
+SPINME_KEYSTORE=/secure/path/release.jks \
+SPINME_KEY_ALIAS=your-alias \
+SPINME_STOREPASS='...' \
+SPINME_KEYPASS='...' \
+ANDROID_SDK_ROOT=/path/to/sdk \
+./tools/build-apk.sh
+```
+
+Release keys and passwords do not belong in the repository. See [Development](docs/DEVELOPMENT.md) for the complete build and signing notes.
+
+## Verify the release
+
+Verify the APK checksum:
+
+```bash
+sha256sum releases/SpinMe-v0.2.0.apk
+```
+
+Expected SHA-256:
+
+```text
+4429878ccbe3427dd46a33ecaa9a6b60f9a8dab261fe67325c90271513befd2b
+```
+
+Verify the signing certificate with Android Build Tools:
+
+```bash
+apksigner verify --verbose --print-certs releases/SpinMe-v0.2.0.apk
+```
+
+Expected signing-certificate SHA-256:
+
+```text
+bcfd9417869e6671e2f33efa7345cd49c0f4a9452d014f1d1fab67de2e166093
+```
+
+## Web companion
+
+The browser implementation lives in [`web/`](web/) and follows the same independent-clock model.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+## Repository map
+
+```text
+spinme/
+├── app/                 Android application
+├── web/                 Companion browser implementation
+├── docs/                Architecture, development, export, and branding docs
+├── releases/            Current signed release and verification metadata
+├── old_bulids/          Archived previous release artifacts
+├── tools/               Direct Android SDK build tooling
+├── CHANGELOG.md         Release history
+└── SECURITY.md          Vulnerability-reporting policy
+```
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Development](docs/DEVELOPMENT.md)
-- [Export behavior](docs/EXPORTS.md)
-- [Branding and credits](docs/BRANDING.md)
-- [Security](SECURITY.md)
-- [Changelog](CHANGELOG.md)
+- [Architecture](docs/ARCHITECTURE.md) — clocks, state, transforms, and rendering model
+- [Development](docs/DEVELOPMENT.md) — Android requirements, build paths, and signing
+- [Export behavior](docs/EXPORTS.md) — PNG/GIF/MP4 timing and sampling behavior
+- [Branding](docs/BRANDING.md) — visual identity and publisher information
+- [Changelog](CHANGELOG.md) — release-by-release changes
+- [Security policy](SECURITY.md) — vulnerability reporting and supported versions
 
-## Credits
+## Security
 
-SpinMe is created and published by **Background Gremlin Group**.
+SpinMe processes imported media locally. For vulnerability reports, use the process described in [SECURITY.md](SECURITY.md) rather than opening a public issue with sensitive details.
 
-**Creating Unique Tools for Unique Individuals.**
+## Publisher
+
+**Background Gremlin Group**  
+*Creating Unique Tools for Unique Individuals.*
+
