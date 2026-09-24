@@ -1,0 +1,11 @@
+SpinMe v0.1.0
+Publisher/Creator: Background Gremlin Group
+Tagline: Creating Unique Tools for Unique Individuals
+Package: com.spinme.app
+Version Code: 1
+Version Name: 0.1.0
+minSdk: 29
+targetSdk: 36
+APK SHA-256: 0c62c3362d3074d3adecc7709d4dddae904d5345693ab3c8a23cb6cbefdef5dc
+Signing Certificate SHA-256: c7e9bae9473bc52364f6b2d50622376aaa80eb6e1859ea5f3342f9d2306d9547
+Signing Certificate DN: CN=Background Gremlin Group, OU=Creating Unique Tools for Unique Individuals, O=Background Gremlin Group
