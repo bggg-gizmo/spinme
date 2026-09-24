@@ -37,15 +37,15 @@ mkdir -p "$OUT/gen" "$OUT/classes" "$OUT/dex"
   -F "$OUT/base-unsigned.apk" \
   --min-sdk-version 29 \
   --target-sdk-version 36 \
-  --version-code 2 \
-  --version-name 0.2.0
+  --version-code 3 \
+  --version-name 1.0.0
 
 find "$SRC/java" "$OUT/gen" -name '*.java' -print > "$OUT/sources.list"
 javac -source 8 -target 8 -encoding UTF-8 -classpath "$PLATFORM" -d "$OUT/classes" @"$OUT/sources.list"
 "$BT/d8" --min-api 29 --lib "$PLATFORM" --output "$OUT/dex" $(find "$OUT/classes" -name '*.class' -print)
 cp "$OUT/base-unsigned.apk" "$OUT/app-unsigned.apk"
 (cd "$OUT/dex" && zip -q -j "$OUT/app-unsigned.apk" classes.dex)
-"$BT/zipalign" -f -p 4 "$OUT/app-unsigned.apk" "$OUT/SpinMe-v0.2.0-aligned-unsigned.apk"
+"$BT/zipalign" -f -p 4 "$OUT/app-unsigned.apk" "$OUT/SpinMe-v1.0.0-aligned-unsigned.apk"
 
 if [[ -n "${SPINME_KEYSTORE:-}" ]]; then
   : "${SPINME_KEY_ALIAS:?Set SPINME_KEY_ALIAS}"
@@ -56,10 +56,10 @@ if [[ -n "${SPINME_KEYSTORE:-}" ]]; then
     --ks-key-alias "$SPINME_KEY_ALIAS" \
     --ks-pass "pass:$SPINME_STOREPASS" \
     --key-pass "pass:$KEY_PASS" \
-    --out "$OUT/SpinMe-v0.2.0.apk" \
-    "$OUT/SpinMe-v0.2.0-aligned-unsigned.apk"
-  "$BT/apksigner" verify --verbose --print-certs "$OUT/SpinMe-v0.2.0.apk"
-  sha256sum "$OUT/SpinMe-v0.2.0.apk"
+    --out "$OUT/SpinMe-v1.0.0.apk" \
+    "$OUT/SpinMe-v1.0.0-aligned-unsigned.apk"
+  "$BT/apksigner" verify --verbose --print-certs "$OUT/SpinMe-v1.0.0.apk"
+  sha256sum "$OUT/SpinMe-v1.0.0.apk"
 else
-  echo "Unsigned aligned APK: $OUT/SpinMe-v0.2.0-aligned-unsigned.apk"
+  echo "Unsigned aligned APK: $OUT/SpinMe-v1.0.0-aligned-unsigned.apk"
 fi
