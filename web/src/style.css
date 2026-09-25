@@ -197,6 +197,10 @@ html[data-theme="light"] .preview-deck {
   text-align: center;
 }
 
+.empty-state[hidden] {
+  display: none;
+}
+
 .empty-state strong { letter-spacing: .09em; }
 .empty-state span { color: var(--muted); font-size: 12px; }
 
