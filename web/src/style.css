@@ -82,6 +82,22 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 }
 
 .topbar p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+
+.release-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.release-line span:first-child {
+  color: var(--accent);
+}
+
 .top-actions { display: flex; gap: 8px; }
 
 .icon-button, .secondary-button, .text-button, .chip, .format-button {

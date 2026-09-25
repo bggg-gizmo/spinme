@@ -1,16 +1,19 @@
 {
+  "id": "/",
   "name": "SpinMe",
   "short_name": "SpinMe",
+  "description": "SpinMe v1.0.0 by Background Gremlin Group — local-first image and GIF rotation with independent source and spin clocks.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#090a0b",
+  "background_color": "#090a0b",
   "icons": [
     {
       "src": "/icon.webp",
-      "sizes": "192x192",
+      "sizes": "256x256",
       "type": "image/webp",
       "purpose": "any maskable"
     }
-  ],
-  "theme_color": "#090a0b",
-  "background_color": "#090a0b",
-  "display": "standalone",
-  "description": "SpinMe by Background Gremlin Group — Creating Unique Tools for Unique Individuals"
+  ]
 }

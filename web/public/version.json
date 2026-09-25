@@ -1,0 +1,10 @@
+{
+  "application": "SpinMe",
+  "channel": "web",
+  "version": "1.0.0",
+  "publisher": "Background Gremlin Group",
+  "tagline": "Creating Unique Tools for Unique Individuals",
+  "localFirst": true,
+  "timingModel": "independent-source-and-spin-clocks",
+  "formats": ["png", "gif", "webm"]
+}

@@ -1,12 +1,15 @@
 import "./style.css";
 import { GIFEncoder, quantize, applyPalette } from "gifenc";
 
+const APP_VERSION = "1.0.0";
+
 const $ = (id) => document.getElementById(id);
 
 const el = {
   openBtn: $("openBtn"),
   emptyOpenBtn: $("emptyOpenBtn"),
   themeBtn: $("themeBtn"),
+  versionLabel: $("versionLabel"),
   fileInput: $("fileInput"),
   dropZone: $("dropZone"),
   sourceImage: $("sourceImage"),
@@ -25,6 +28,8 @@ const el = {
   pauseBtn: $("pauseBtn"),
   directionBtn: $("directionBtn"),
   zeroBtn: $("zeroBtn"),
+  startAngle: $("startAngle"),
+  startAngleOut: $("startAngleOut"),
   playbackLabel: $("playbackLabel"),
   playbackButtons: [...document.querySelectorAll(".playback-button")],
   pivotX: $("pivotX"),
@@ -62,6 +67,7 @@ const state = {
   rampDuration: 5,
   direction: 1,
   angle: 0,
+  startAngle: 0,
   spinning: true,
   lastFrameTime: 0,
   pivotX: 0.5,
@@ -112,9 +118,36 @@ function updatePreview() {
 }
 
 function updateControls() {
-  el.openBtn.disabled = state.exportBusy;
-  el.emptyOpenBtn.disabled = state.exportBusy;
-  el.fileInput.disabled = state.exportBusy;
+  const busyControls = [
+    el.openBtn,
+    el.emptyOpenBtn,
+    el.themeBtn,
+    el.fileInput,
+    el.rpmRange,
+    el.rpmInput,
+    el.rampDuration,
+    el.rampBtn,
+    el.pauseBtn,
+    el.directionBtn,
+    el.zeroBtn,
+    el.startAngle,
+    el.pivotX,
+    el.pivotY,
+    el.zoom,
+    el.centerBtn,
+    el.fps,
+    el.duration,
+    el.size,
+    ...el.playbackButtons,
+    ...el.formatButtons,
+    ...document.querySelectorAll(".rpm-preset"),
+  ];
+  busyControls.forEach((control) => {
+    if (control) control.disabled = state.exportBusy;
+  });
+  if (el.versionLabel) {
+    el.versionLabel.textContent = "WEB v" + APP_VERSION;
+  }
   el.rpmReadout.textContent = state.rpm.toFixed(1) + " RPM";
   el.rpmRange.max = String(state.rpmRangeMax);
   el.rpmRange.value = String(Math.min(state.rpm, state.rpmRangeMax));
@@ -124,6 +157,9 @@ function updateControls() {
   if (document.activeElement !== el.rpmInput) {
     el.rpmInput.value = String(Number(state.rpm.toFixed(1)));
   }
+
+  el.startAngle.value = String(Math.round(state.startAngle));
+  el.startAngleOut.textContent = Math.round(state.startAngle) + "°";
 
   el.pauseBtn.textContent = state.spinning ? "Pause spin" : "Resume spin";
   el.directionBtn.textContent = state.direction === 1 ? "Clockwise" : "Counter";
@@ -157,7 +193,7 @@ function updateControls() {
   });
 
   el.motionExportControls.hidden = state.format === "png";
-  el.transparentBg.disabled = state.format === "webm";
+  el.transparentBg.disabled = state.exportBusy || state.format === "webm";
 
   if (state.format === "png") {
     el.formatLabel.textContent = "SNAPSHOT";
@@ -284,11 +320,6 @@ async function loadSource(file) {
 
   state.sourceFile = file;
   state.objectUrl = URL.createObjectURL(file);
-  state.angle = 0;
-  state.spinning = true;
-  state.ramping = false;
-  state.rampElapsed = 0;
-  state.sourcePlayback = "pingpong";
 
   el.sourceImage.src = state.objectUrl;
   el.sourceImage.alt = file.name;
@@ -312,7 +343,7 @@ async function loadSource(file) {
     file.name + " • " +
     el.sourceImage.naturalWidth + "×" + el.sourceImage.naturalHeight;
 
-  setStatus("Ready. GIFs default to ping-pong; spin timing remains independent.");
+  setStatus("Ready. Source timing remains independent from spin timing.");
   updateControls();
   updatePreview();
 
@@ -333,7 +364,7 @@ async function loadSource(file) {
         el.sourceCanvas.style.display = "block";
         el.sourceImage.style.display = "none";
         state.sourceLoadedAt = performance.now();
-        setStatus("Ping-pong source preview active. GIF frame delays remain native.");
+        setStatus("Decoded animation preview active. Source frame delays remain native.");
       } else {
         el.sourceCanvas.style.display = "none";
         el.sourceImage.style.display = "block";
@@ -477,8 +508,9 @@ function renderComposite(ctx, source, angleDegrees, transparent) {
   }
 
   const [sourceWidth, sourceHeight] = sourceDimensions(source);
-  const diagonal = Math.max(1, Math.hypot(sourceWidth, sourceHeight));
-  const scale = (size * state.zoom) / diagonal;
+  const scale =
+    Math.min(size / Math.max(1, sourceWidth), size / Math.max(1, sourceHeight)) *
+    state.zoom;
   const drawWidth = sourceWidth * scale;
   const drawHeight = sourceHeight * scale;
   const left = (size - drawWidth) / 2;
@@ -851,7 +883,7 @@ el.dropZone.addEventListener("drop", (event) => {
 let pivotDragging = false;
 
 function setPivotFromPointer(event) {
-  if (!state.sourceFile) return;
+  if (state.exportBusy || !state.sourceFile) return;
   const rect = el.dropZone.getBoundingClientRect();
   state.pivotX = clamp((event.clientX - rect.left) / rect.width, 0, 1);
   state.pivotY = clamp((event.clientY - rect.top) / rect.height, 0, 1);
@@ -860,7 +892,7 @@ function setPivotFromPointer(event) {
 }
 
 el.dropZone.addEventListener("pointerdown", (event) => {
-  if (!state.sourceFile || event.button !== 0) return;
+  if (state.exportBusy || !state.sourceFile || event.button !== 0) return;
   pivotDragging = true;
   el.dropZone.setPointerCapture(event.pointerId);
   setPivotFromPointer(event);
@@ -941,14 +973,22 @@ el.directionBtn.addEventListener("click", () => {
 });
 
 el.zeroBtn.addEventListener("click", () => {
+  state.startAngle = 0;
   state.angle = 0;
+  updateControls();
+  updatePreview();
+});
+
+el.startAngle.addEventListener("input", () => {
+  state.startAngle = normalizeDegrees(Number(el.startAngle.value) || 0);
+  state.angle = state.startAngle;
+  updateControls();
   updatePreview();
 });
 
 el.playbackButtons.forEach((button) => {
   button.addEventListener("click", () => {
     state.sourcePlayback = button.dataset.playback;
-    state.sourceLoadedAt = performance.now();
     updateControls();
 
     if (state.sourcePlayback === "pingpong") {
