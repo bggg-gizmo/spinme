@@ -82,3 +82,27 @@ For v1.0.0 the public APK is:
 `releases/SpinMe-v1.0.0.apk`
 
 Release publication requires successful ZIP-integrity, zipalign, package/version, and APK-signature verification. See [Development](DEVELOPMENT.md) and [release metadata](../releases/README.md).
+
+
+## Web implementation
+
+The `web/` companion is versioned 1.0.0 and mirrors the same behavioral model using browser APIs.
+
+- `web/src/main.js` owns source playback, independent spin timing, ramp integration, preview state, and browser export.
+- `ImageDecoder` is used when available to obtain deterministic animated GIF/WebP frames for Ping-pong, Loop, Once, and sampled export.
+- Static/native-image fallback remains available when decoded animation support is unavailable.
+- `gifenc` produces animated GIF output locally in the browser.
+- `MediaRecorder` + `canvas.captureStream()` produce WebM when supported by the browser.
+- PNG uses the browser canvas encoder.
+
+Preview and web export use the same contain-and-scale transform:
+
+```text
+scale = min(outputWidth / sourceWidth, outputHeight / sourceHeight) × userScale
+```
+
+Rotation uses the same normalized output-canvas pivot as preview. Export controls are locked while an export is running so RPM, direction, playback mode, pivot, scale, theme, duration, FPS, or format cannot change mid-render.
+
+Loading replacement media resets the source clock for the new media but preserves unrelated spin controls and current spin state.
+
+Web release identity is published in `web/public/version.json`, while installable/PWA metadata is in `web/public/site.webmanifest`.

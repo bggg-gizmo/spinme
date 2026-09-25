@@ -128,3 +128,57 @@ The current public artifact belongs under `releases/`. Withdrawn or superseded a
 Temporary transfer/staging chunks must not remain in `main` after publication.
 
 SpinMe does not use GitHub Actions for its release process.
+
+
+## Web development
+
+The browser companion is versioned **1.0.0**.
+
+Requirements:
+
+- a current Node.js runtime;
+- npm;
+- a modern browser for development/preview.
+
+Install and validate:
+
+```bash
+cd web
+npm install
+npm run check
+npm run build
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Preview the production bundle:
+
+```bash
+npm run preview
+```
+
+`npm run check` performs JavaScript syntax validation. `npm run build` performs the Vite production build.
+
+The generated `web/dist/` directory and `web/node_modules/` are intentionally ignored and must not be committed as release source.
+
+### Web release checks
+
+Before publishing a web-version change:
+
+- ensure `web/package.json` has the intended version;
+- ensure `web/public/version.json` matches it;
+- ensure visible web release identity matches it;
+- parse `site.webmanifest`, `version.json`, and `package.json` as valid JSON;
+- run JavaScript syntax validation;
+- run the Vite production build;
+- verify `web/public/icon.webp` and `favicon.webp` use the canonical launcher artwork;
+- verify exact RPM, ramp, pause, direction, start angle, playback modes, pivot, scale, and export behavior;
+- verify preview/export transform parity;
+- verify controls cannot mutate render state during an active export;
+- verify no temporary build/staging files remain in source control.
+
+The browser implementation processes imported media locally. It does not upload source images to a SpinMe service.

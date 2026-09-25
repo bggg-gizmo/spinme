@@ -154,13 +154,19 @@ Also see [`releases/SHA256SUMS.txt`](releases/SHA256SUMS.txt) and [`releases/REL
 
 ## Web companion
 
-The browser implementation lives in [`web/`](web/) and follows the same independent-clock model.
+The browser implementation is also versioned **1.0.0** and lives in [`web/`](web/). It follows the same independent-clock, uncapped-RPM, ramp, start-angle, scale, and normalized-pivot model as the native application.
+
+Web exports support PNG, animated GIF, and WebM. Browser media/codec capabilities vary, so the web UI reports when decoded animated-frame playback or WebM recording is unavailable.
 
 ```bash
 cd web
 npm install
+npm run check
+npm run build
 npm run dev
 ```
+
+See the [web companion documentation](web/README.md) for browser capability notes and release metadata.
 
 ## Repository map
 
@@ -181,6 +187,7 @@ spinme/
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Development and release process](docs/DEVELOPMENT.md)
+- [Web companion](web/README.md)
 - [Export behavior](docs/EXPORTS.md)
 - [Branding](docs/BRANDING.md)
 - [Current release verification](releases/README.md)
