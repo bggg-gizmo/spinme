@@ -13,7 +13,7 @@
     "gifenc": "1.0.3"
   },
   "devDependencies": {
-    "vite": "7.3.5"
+    "vite": "7.3.7"
   },
   "description": "SpinMe v1.0.0 web companion — Background Gremlin Group — Creating Unique Tools for Unique Individuals",
   "author": "Background Gremlin Group"
